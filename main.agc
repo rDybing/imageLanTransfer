@@ -11,6 +11,8 @@
  * For Milla Says AS
  *
  * *******************************************/
+ 
+ #include "networkIO.agc"
 
 SetErrorMode(2)
 
@@ -24,7 +26,7 @@ SetClearColor(255, 127, 0)
 UseNewDefaultFonts(1)
 
 #constant true = 1
-#constant flase = 0
+#constant false = 0
 #constant nil = -1
 
 type sprite_t
@@ -52,8 +54,15 @@ type gameState_t
 	netHostPort			as integer
 	netClientID			as integer
 	netClientName		as string
+	netClients			as integer
+	net					as clients_t[]
+	networkID			as integer
 endType
 
+type clients_t
+	clientID			as integer
+	clientName			as string
+endType
 
 global isServer 		as integer = true
 global sprite			as sprite_t
@@ -67,6 +76,8 @@ function main()
 	mode 	as string
 	gs		as gameState_t
 	titles	as string[3] = ["imgFish.png", "imgFlower.png", "imgFork.png", "imgGoat.png"]
+	
+	gs.netHostPort = 1025
 		
 	if isServer
 		mode = "running as server"
@@ -77,33 +88,64 @@ function main()
 	if isServer
 		loadMedia(titles)
 		assignSprites()
-		setupLAN(gs)
+		server(gs, titles)				
 	else
 		gs.netId = JoinNetwork("testNet", "testClient")
 	endif
 	
+	
+endFunction
+
+function server(gs ref as gameState_t, t as string[])
+	
+	setupLAN(gs)
+	
+	// network established
 	repeat
-		print(mode)
+		print("Acting as server")
 		print("netId: " + str(gs.netId))
+		print("Press button to continue")
+		sync()
+	until GetPointerPressed()
+		
+	// get and display client info
+	repeat
+		if IsNetworkActive(gs.netID)
+			print("waiting for client")
+			listenClientsStatus(gs)
+		else
+			print("Error, net disconnected")
+			quit = true	
+		endif
+		sync()
+	until gs.net.length <> nil or quit
+	
+	repeat
+		print("client connected:")
+		print(str(gs.net[0].clientID) + " | " + gs.net[0].clientName)
+		print("Press button to send image Data")
 		sync()
 	until GetPointerPressed()
 	
-endFunction
-
-function setupLAN(gs ref as gameState_t)
+	// send image data
+	sendRoundData(gs, t)
 	
-	gs.netHostPort = 1025
-	gs.netID = hostNetwork("testNet", "Host", gs.netHostPort)
-	SetNetworkLatency(gs.netID, 50)
-		
-endFunction
-
-function sendRoundData(gs as gameState_t, t as string[])
-
-	clientRound = createNetworkMessage()
-	AddNetworkMessageString(clientRound, t[0] + ":" + t[1] + ":" + t[2] + ":" + t[3])
-	sendNetworkMessage(gs.netID, 0, clientRound)
-
+	repeat
+		print("image data sent")
+		print("Press button to send images")
+	until GetPointerPressed()
+	
+	// send image files
+	
+	
+	// quit
+	repeat
+		print("Press button to close network and exit")
+		sync()
+	until GetPointerPressed()
+	
+	closeNetwork(gs.netID)
+	
 endFunction
 
 function constants()
