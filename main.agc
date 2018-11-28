@@ -12,7 +12,7 @@
  *
  * *******************************************/
  
- #include "networkIO.agc"
+#include "networkIO.agc"
 
 SetErrorMode(2)
 
@@ -64,7 +64,7 @@ type clients_t
 	clientName			as string
 endType
 
-global isServer 		as integer = true
+global isServer 		as integer = false
 global sprite			as sprite_t
 global media			as media_t
 
@@ -75,6 +75,7 @@ function main()
 
 	mode 	as string
 	gs		as gameState_t
+	cl		as clients_t
 	titles	as string[3] = ["imgFish.png", "imgFlower.png", "imgFork.png", "imgGoat.png"]
 	
 	gs.netHostPort = 1025
@@ -90,10 +91,24 @@ function main()
 		assignSprites()
 		server(gs, titles)				
 	else
-		gs.netId = JoinNetwork("testNet", "testClient")
+		client(cl, gs)
 	endif
 	
+	quit(gs)
 	
+endFunction
+
+function client(cl ref as clients_t, gs ref as gameState_t)
+	
+		cl.clientName = "testClient"
+		gs.netId = JoinNetwork("testNet", cl.clientName)
+		cl.clientID = GetNetworkMyClientId(gs.netId)
+		repeat
+			print("Connected as client with ID: ")
+			print(str(gs.netId))
+			sync()
+		until GetPointerPressed()
+
 endFunction
 
 function server(gs ref as gameState_t, t as string[])
@@ -103,7 +118,8 @@ function server(gs ref as gameState_t, t as string[])
 	// network established
 	repeat
 		print("Acting as server")
-		print("netId: " + str(gs.netId))
+		print("netId   : " + str(gs.netId))
+		print("serverId: " + str(getNetworkServerId(gs.netId))
 		print("Press button to continue")
 		sync()
 	until GetPointerPressed()
@@ -137,14 +153,16 @@ function server(gs ref as gameState_t, t as string[])
 	
 	// send image files
 	
+endFunction
+
+function quit(gs as gameState_t)
 	
-	// quit
 	repeat
 		print("Press button to close network and exit")
 		sync()
 	until GetPointerPressed()
 	
-	closeNetwork(gs.netID)
+	CloseNetwork(gs.netId)
 	
 endFunction
 
