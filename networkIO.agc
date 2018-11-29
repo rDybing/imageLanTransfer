@@ -108,6 +108,31 @@ function getServerAck(gs ref as gameState_t)
 	
 endFunction out
 
+function getRoundData(gs as gameState_t)
+	
+	clientRound as integer
+	temp as string = ""
+	
+	card as string[3]
+	
+	clientRound = GetNetworkMessage(gs.networkID)
+	
+	if clientRound <> 0
+		temp = GetNetworkMessageString(clientRound)
+	endif
+	
+	DeleteNetworkMessage(clientRound)
+	
+	if temp <> ""
+		if CountStringTokens(temp, ":") > 0
+			for i = 0 to 3
+				card[i] = GetStringToken(temp, ":", i + 1)
+			next i
+		endif
+	endif
+		
+endFunction card
+
 // ************************************************ Chores *************************************************************
 
 function getClientExists(gs as gameState_t, clientName as string)

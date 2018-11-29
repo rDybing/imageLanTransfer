@@ -48,10 +48,12 @@ output_path=
 [projectfiles]
 FILE_0=main.agc;-1
 FILE_1=networkIO.agc;-1
+FILE_2=byteHandling.agc;-1
 
 [files]
-FILE_NAME_0=0;main.agc;0;0
-FILE_NAME_1=1;networkIO.agc;0;1
+FILE_NAME_0=0;main.agc;2130;0
+FILE_NAME_1=0;networkIO.agc;0;1
+FILE_NAME_2=1;byteHandling.agc;0;2
 
 [project]
 description=

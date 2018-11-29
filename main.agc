@@ -13,6 +13,7 @@
  * *******************************************/
  
 #include "networkIO.agc"
+#include "byteHandling.agc"
 
 SetErrorMode(2)
 
@@ -100,14 +101,32 @@ endFunction
 
 function client(cl ref as clients_t, gs ref as gameState_t)
 	
+		words as string[3]
+		
 		cl.clientName = "testClient"
 		gs.netId = JoinNetwork("testNet", cl.clientName)
-		cl.clientID = GetNetworkMyClientId(gs.netId)
 		repeat
+			cl.clientID = GetNetworkMyClientId(gs.netId)
 			print("Connected as client with ID: ")
-			print(str(gs.netId))
+			print(str(cl.clientId))
+			sync()
+		until GetPointerPressed() or cl.clientId <> 0
+		
+		repeat
+			print("Press to receive Images data")
 			sync()
 		until GetPointerPressed()
+		
+		words = getRoundData(gs)
+		
+		repeat
+			for i = 0 to 3
+				print("Image " + str(i + 1) + ": " + words[i])
+			next i
+			print("Press to receive images")
+		until GetPointerPressed()
+		
+		// receive image files
 
 endFunction
 
@@ -119,7 +138,7 @@ function server(gs ref as gameState_t, t as string[])
 	repeat
 		print("Acting as server")
 		print("netId   : " + str(gs.netId))
-		print("serverId: " + str(getNetworkServerId(gs.netId))
+		print("serverId: " + str(getNetworkServerId(gs.netId)))
 		print("Press button to continue")
 		sync()
 	until GetPointerPressed()
